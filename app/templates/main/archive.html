@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Archive - Flask App{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-4">Archive</h1>
+        
+        {% if posts.items %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Posts from {{ year }}{% if month %} {{ month|month_name }}{% endif %}</h5>
+                </div>
+                <div class="card-body">
+                    {% for post in posts.items %}
+                        <div class="border-bottom pb-3 mb-3">
+                            <h3>
+                                <a href="{{ url_for('main.post_detail', id=post.id) }}" class="text-decoration-none">
+                                    {{ post.title }}
+                                </a>
+                            </h3>
+                            <p class="text-muted mb-2">
+                                <small>
+                                    By <a href="{{ url_for('main.author_profile', username=post.author.username) }}">{{ post.author.username }}</a> 
+                                    on {{ post.created_at.strftime('%B %d, %Y') }}
+                                </small>
+                            </p>
+                            {% if post.summary %}
+                                <p>{{ post.summary }}</p>
+                            {% else %}
+                                <p>{{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}</p>
+                            {% endif %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% for tag in post.tags %}
+                                        <span class="badge bg-secondary me-1">
+                                            <a href="{{ url_for('main.tag_posts', name=tag.name) }}" class="text-white text-decoration-none">
+                                                {{ tag.name }}
+                                            </a>
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                                <a href="{{ url_for('main.post_detail', id=post.id) }}" class="btn btn-outline-primary btn-sm">
+                                    Read More <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            {% if posts.pages > 1 %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if posts.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('main.archive', page=posts.prev_num, year=year, month=month) }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for page_num in posts.iter_pages() %}
+                            {% if page_num %}
+                                {% if page_num != posts.page %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('main.archive', page=page_num, year=year, month=month) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if posts.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('main.archive', page=posts.next_num, year=year, month=month) }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info">
+                <h4>No posts found</h4>
+                <p>No posts found for the selected period.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Archive by Month</h5>
+            </div>
+            <div class="card-body">
+                {% if archive_months %}
+                    <div class="list-group">
+                        {% for month_data in archive_months %}
+                            <a href="{{ url_for('main.archive', year=month_data.year, month=month_data.month) }}" 
+                               class="list-group-item list-group-item-action">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                {{ month_data.month|month_name }} {{ month_data.year }}
+                                <span class="badge bg-primary float-end">{{ month_data.count }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No archive data available.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Posts</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_posts %}
+                    {% for post in recent_posts %}
+                        <div class="mb-3">
+                            <h6>
+                                <a href="{{ url_for('main.post_detail', id=post.id) }}" class="text-decoration-none">
+                                    {{ post.title }}
+                                </a>
+                            </h6>
+                            <small class="text-muted">{{ post.created_at.strftime('%B %d, %Y') }}</small>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No recent posts available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
