@@ -102,9 +102,13 @@ def login():
 def logout():
     """User logout endpoint"""
     try:
+        # Log the authorization header for debugging
+        auth_header = request.headers.get('Authorization')
+        current_app.logger.info(f"Logout attempt with Authorization header: {auth_header}")
+        
         # In a real application, you might want to blacklist the token
         # For now, we'll just return a success message
-        return jsonify({'message': 'Logout successful'})
+        return jsonify({'message': 'Logout successful'}), 200
     except Exception as e:
         current_app.logger.error(f"Logout error: {str(e)}")
         return jsonify({'error': 'Logout failed'}), 500

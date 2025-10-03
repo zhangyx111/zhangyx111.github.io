@@ -39,9 +39,6 @@ def create_app(config_name=None):
 
     db.init_app(app)
     with app.app_context():
-
-        # db.drop_all()
-        print("✓ 所有表已删除")
         db.create_all()
 
     migrate.init_app(app, db)
