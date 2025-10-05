@@ -1,5 +1,5 @@
 from langchain_community.llms import Ollama
-#from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.embeddings import OllamaEmbeddings
 import faiss
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
@@ -23,13 +23,6 @@ sentences = ["This is an example sentence", "Each sentence is converted"]
 embeddings_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 embeddings = embeddings_model.encode(sentences)
 print(embeddings)
-
-# vector_store = FAISS(
-#     embedding_function=embeddings,
-#     index=index,
-#     docstore=InMemoryDocstore(),
-#     index_to_docstore_id={},
-# )    
 
 class LLMService:
     def __init__(self, model_name: str = "qwen3:8b"):

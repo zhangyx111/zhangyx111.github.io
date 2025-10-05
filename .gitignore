@@ -1,5 +1,6 @@
 # User defined
 web/node_modules/
+gbk2utf8.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -53,7 +53,7 @@
 ### 2.2 技术栈选择
 
 #### 2.2.1 前端技术栈
-- **框架**：React 18+ 或 Vue 3+
+- **框架**：React 18+
 - **状态管理**：Redux Toolkit 或 Pinia
 - **UI组件库**：Ant Design 或 Element Plus
 - **构建工具**：Vite 或 Webpack
@@ -62,7 +62,7 @@
 #### 2.2.2 后端技术栈
 - **主框架**：Flask 3.1.2
 - **业务逻辑**：LangChain
-- **数据库ORM**：MyBatis Plus 或 SQLAlchemy
+- **数据库ORM**：SQLAlchemy
 - **API文档**：Swagger/OpenAPI 3.0
 - **缓存**：Redis
 - **消息队列**：RabbitMQ（可选）
@@ -75,7 +75,7 @@
 - **向量数据库**：FAISS
 
 #### 2.2.4 数据存储栈
-- **关系型数据库**：MySQL 8.0+ 或 SQLite 3.0+
+- **关系型数据库**：MySQL 8.0+ 
 - **向量数据库**：FAISS
 - **文件存储**：本地文件系统
 - **搜索引擎**：Elasticsearch（可选）
