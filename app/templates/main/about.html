@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}About - Flask App{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-4">About Flask App</h1>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">Welcome to Our Application</h3>
+                <p class="card-text">
+                    This is a modern web application built using the Flask framework. It demonstrates various features 
+                    commonly found in web applications, including user authentication, content management, and more.
+                </p>
+                <p class="card-text">
+                    Our application is designed to be scalable, maintainable, and secure, following best practices 
+                    for Flask development.
+                </p>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">Key Features</h3>
+                <ul>
+                    <li><strong>User Authentication:</strong> Secure login and registration system with role-based access control</li>
+                    <li><strong>Content Management:</strong> Create, edit, and manage posts with tags and categories</li>
+                    <li><strong>Search Functionality:</strong> Full-text search across posts and content</li>
+                    <li><strong>User Profiles:</strong> Customizable user profiles with personal information</li>
+                    <li><strong>Comments:</strong> Interactive comment system for user engagement</li>
+                    <li><strong>Responsive Design:</strong> Mobile-friendly interface using Bootstrap</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">Technology Stack</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Backend</h5>
+                        <ul>
+                            <li>Flask - Web Framework</li>
+                            <li>Flask-SQLAlchemy - Database ORM</li>
+                            <li>Flask-Login - User Session Management</li>
+                            <li>Flask-Migrate - Database Migrations</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Frontend</h5>
+                        <ul>
+                            <li>Bootstrap 5 - UI Framework</li>
+                            <li>Font Awesome - Icons</li>
+                            <li>JavaScript - Interactive Features</li>
+                            <li>HTML5/CSS3 - Markup and Styling</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Contact Us</h3>
+                <p class="card-text">
+                    Have questions or suggestions? We'd love to hear from you!
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Email:</strong> <a href="mailto:info@flaskapp.com">info@flaskapp.com</a></p>
+                        <p><strong>Phone:</strong> +1 (555) 123-4567</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Address:</strong> 123 Flask Street, Web City, WC 12345</p>
+                        <p><strong>Hours:</strong> Monday - Friday, 9:00 AM - 5:00 PM</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('main.contact') }}" class="btn btn-primary">Send us a message</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Links</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a href="{{ url_for('main.index') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-home me-2"></i> Home
+                    </a>
+                    <a href="{{ url_for('main.about') }}" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-info-circle me-2"></i> About
+                    </a>
+                    <a href="{{ url_for('main.contact') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-envelope me-2"></i> Contact
+                    </a>
+                    <a href="{{ url_for('main.archive') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-archive me-2"></i> Archive
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Follow Us</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-around">
+                    <a href="#" class="text-primary"><i class="fab fa-facebook fa-2x"></i></a>
+                    <a href="#" class="text-info"><i class="fab fa-twitter fa-2x"></i></a>
+                    <a href="#" class="text-danger"><i class="fab fa-instagram fa-2x"></i></a>
+                    <a href="#" class="text-dark"><i class="fab fa-github fa-2x"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
