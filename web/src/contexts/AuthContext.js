@@ -17,22 +17,26 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch (e) {
-        console.error('Error parsing user data:', e);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+      
+      if (token && userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+          setIsAuthenticated(true);
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+        }
       }
-    }
-    
-    setLoading(false);
+      
+      setLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (username, password) => {
@@ -69,28 +73,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const verifyToken = async () => {
-    try {
-      const userData = await getUserProfile();
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      return userData;
-    } catch (error) {
-      console.error('Token verification error:', error);
-      if (error.response?.status === 401) {
-        logout();
-      }
-      throw error;
-    }
-  };
-
   const value = {
     user,
     isAuthenticated,
     loading,
     login,
     logout,
-    verifyToken
   };
 
   return (

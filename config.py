@@ -2,6 +2,10 @@ import os
 from datetime import timedelta
 
 class Config:
+
+    #Web Configuration
+    News_Count = int(os.environ.get("NewsCount", 0)) or 0
+
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
     # Default to SQLite if no DATABASE_URL is set
@@ -10,8 +14,9 @@ class Config:
     
     # JWT Configuration
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-key'
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)  # 增加到24小时
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+    JWT_TOKEN_LOCATION = ['headers']  # 只从headers中获取token
     
     # File Upload Configuration
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or 'app/static/uploads'
@@ -22,6 +27,8 @@ class Config:
     
     # CORS Configuration
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS') or '*'
+    CORS_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+    CORS_ALLOW_HEADERS = ['Content-Type', 'Authorization']
 
 class DevelopmentConfig(Config):
     DEBUG = True
