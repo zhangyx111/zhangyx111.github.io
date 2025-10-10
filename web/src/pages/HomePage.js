@@ -1,33 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getNewsCount } from '../services/newsService';
 import './HomePage.css';
 
 function HomePage() {
-  const { user, isAuthenticated, loading: authLoading, logout } = useAuth();
+  const { user, isAuthenticated, loading: authLoading, logout, verifyToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [newsCount, setNewsCount] = useState(0);
   const navigate = useNavigate();
-
-  // 获取新闻总数
-  useEffect(() => {
-    const fetchNewsCount = async () => {
-      try {
-        const response = await getNewsCount();
-        setNewsCount(response.count || 0);
-      } catch (error) {
-        console.error('获取新闻总数失败:', error);
-        // 如果API调用失败，使用环境变量作为后备
-        setNewsCount(process.env.REACT_APP_MAX_NEWS || 0);
-      }
-    };
-
-    if (isAuthenticated) {
-      fetchNewsCount();
-    }
-  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -35,38 +15,23 @@ function HomePage() {
       return;
     }
 
-    const initializeHomePage = async () => {
+    const verifyTokenAndFetchUser = async () => {
       try {
-        
-        // 获取新闻总数
-        const fetchNewsCount = async () => {
-          try {
-            const response = await getNewsCount();
-            setNewsCount(response.count || 0);
-          } catch (error) {
-            console.error('获取新闻总数失败:', error);
-            // 如果API调用失败，使用环境变量作为后备
-            setNewsCount(process.env.REACT_APP_MAX_NEWS || 0);
-          }
-        };
-
-        fetchNewsCount();
+        await verifyToken();
       } catch (error) {
-        console.error('HomePage initialization failed:', error);
+        console.error('Token verification failed:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    initializeHomePage();
+    verifyTokenAndFetchUser();
   }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-
-
 
   const renderDashboard = () => (
     <div className="dashboard-section">
@@ -76,7 +41,7 @@ function HomePage() {
           <div className="stat-icon">📰</div>
           <div className="stat-content">
             <h3>新闻总数</h3>
-            <p>{newsCount}</p>
+            <p>1,234</p>
           </div>
         </div>
         <div className="stat-card">

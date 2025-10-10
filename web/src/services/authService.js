@@ -23,12 +23,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // 只有在不是登录请求的情况下才清除token并重定向
-      if (!error.config.url.includes('/auth/login')) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-      }
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -55,32 +52,12 @@ export const register = async (username, email, password) => {
 
 export const getUserProfile = async () => {
   try {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      // 如果没有令牌，可以立即抛出错误或返回特定的错误状态
-      throw new Error('No authentication token found');
-    }    
-
-    verifyToken();
-
     const response = await api.get('/auth/profile');
     return response.data;
   } catch (error) {
     throw error;
   }
 };
-
-    const verifyToken = async () => {
-        try {
-          const response = await axios.get('http://localhost:5000/api/protected');
-          // 如果token有效，可以在这里获取用户信息
-          setUser({ id: response.data.user_id });
-          setLoading(false);
-        } catch (error) {
-          // token无效，尝试刷新
-          await refreshToken();
-        }
-      };
 
 export const logout = async () => {
   try {

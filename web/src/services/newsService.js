@@ -1,16 +1,5 @@
 import api from './authService';
 
-// 获取新闻总数
-export const getNewsCount = async () => {
-  try {
-    const response = await api.get('/api/news/count');
-    return response.data;
-  } catch (error) {
-    console.error('获取新闻总数失败:', error);
-    throw error;
-  }
-};
-
 // 获取新闻列表
 export const getNewsList = async (params = {}) => {
   try {
