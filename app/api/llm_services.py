@@ -189,58 +189,8 @@ class LLMService:
             logger.error(f"合并索引失败: {e}")
             raise
 
-    def cleanup_old_data(self) -> int:
-        """
-        清理过期数据
+    def _get_vectorstore(self):
         
-        Returns:
-            删除的索引文件数量
-        """
-        try:
-            cutoff_date = datetime.date.today() - datetime.timedelta(days=self.retention_days)
-            logger.info(f"清理早于 {cutoff_date} 的数据")
-            deleted_count = 0
-            
-            # 获取 save_dir 下的所有子文件夹
-            if not os.path.exists(self.save_dir):
-                logger.warning(f"保存目录不存在: {self.save_dir}")
-                return 0
-            
-            all_items = os.listdir(self.save_dir)
-            
-            for item_name in all_items:
-                item_path = os.path.join(self.save_dir, item_name)
-                print(item_name)
-                # 只处理文件夹
-                if not os.path.isdir(item_path):
-                    continue
-            
-                if item_name.startswith("faiss_"):
-                    date_str = item_name[6:]  # 去掉 "faiss"
-                    print(date_str, len(date_str))
-                    if len(date_str) == 10 and date_str.count('_') == 2:
-                        try:
-                            file_date = datetime.datetime.strptime(date_str, "%Y_%m_%d").date()
-                            print(file_date)
-                        except ValueError:
-                            logger.warning(f"无法解析日期: {date_str}")
-            
-                # 如果成功解析日期且日期早于截止日期，删除文件夹
-                if file_date is not None and file_date <= cutoff_date:
-                    try:
-                        import shutil
-                        shutil.rmtree(item_path)
-                        deleted_count += 1
-                        logger.info(f"删除过期文件夹: {item_name} (创建日期: {file_date})")
-                    except Exception as e:
-                        logger.error(f"删除文件夹失败: {item_name}, 错误: {e}")
-            
-            logger.info(f"清理完成，删除了 {deleted_count} 个过期的索引文件")
-            return deleted_count
-            
-        except Exception as e:
-            logger.error(f"清理数据失败: {e}")
-            raise
 
     def stream(self, prompt: str):
         """
@@ -260,10 +210,6 @@ class LLMService:
 
 
 
-class State(TypedDict):
-        question: str
-        context: List[Document]
-        answer: str
 
 
     # Define application steps

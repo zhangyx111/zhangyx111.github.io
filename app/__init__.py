@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from sqlalchemy import text
 from config import config
 
 # 配置日志
@@ -39,6 +40,15 @@ def create_app(config_name=None):
 
     db.init_app(app)
     with app.app_context():
+        # engine = db.engine
+        # with engine.begin() as connection:
+        #     # Disable foreign key checks
+        #     connection.execute(text('SET FOREIGN_KEY_CHECKS=0;'))
+        #     # Drop all tables using the connection
+        #     db.metadata.drop_all(connection)
+        #     # Re-enable foreign key checks
+        #     connection.execute(text('SET FOREIGN_KEY_CHECKS=1;'))
+        # # 创建所有表
         db.create_all()
 
     migrate.init_app(app, db)
@@ -75,6 +85,12 @@ def create_app(config_name=None):
     
     from app.api.news_stats import news_stats_bp
     app.register_blueprint(news_stats_bp)
+    
+    from app.api.llm_service import llm_bp
+    app.register_blueprint(llm_bp)
+
+    from app.api.knowledge import knowledge_bp
+    app.register_blueprint(knowledge_bp)
     
     return app
 

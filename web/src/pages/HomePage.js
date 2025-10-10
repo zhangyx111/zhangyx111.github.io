@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import knowledgeService from '../services/knowledgeService';
+import KnowledgeManagement from '../components/KnowledgeManagement';
 import './HomePage.css';
 
 function HomePage() {
@@ -98,43 +100,148 @@ function HomePage() {
     </div>
   );
 
-  const renderIntelligentQuery = () => (
-    <div className="query-section">
-      <h2>智能查询</h2>
-      <div className="query-container">
-        <div className="query-input">
-          <input 
-            type="text" 
-            placeholder="输入您的问题..." 
-            className="query-field"
-          />
-          <button className="btn btn-primary">查询</button>
-        </div>
-        <div className="query-options">
-          <label>
-            <input type="checkbox" /> 语义搜索
-          </label>
-          <label>
-            <input type="checkbox" /> 关键词搜索
-          </label>
-          <label>
-            <input type="checkbox" /> 日期范围
-          </label>
-        </div>
-        <div className="query-results">
-          <h3>查询结果</h3>
-          <div className="result-item">
-            <h4>人工智能技术在新闻行业的应用</h4>
-            <p>人工智能技术正在改变新闻行业的生产方式...</p>
-            <div className="result-meta">
-              <span>相似度: 95%</span>
-              <span>来源: 科技日报</span>
+  const renderIntelligentQuery = () => {
+    const [query, setQuery] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [results, setResults] = useState([]);
+    const [searchType, setSearchType] = useState('semantic');
+    const [topK, setTopK] = useState(5);
+    const [error, setError] = useState(null);
+
+    const handleSearch = async () => {
+      if (!query.trim()) {
+        setError('请输入查询内容');
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      setResults([]);
+
+      try {
+        const response = await fetch('/api/llm_service/search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            query: query.trim(),
+            top_k: topK
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          setResults(data.data.results);
+        } else {
+          setError(data.message || '查询失败');
+        }
+      } catch (err) {
+        console.error('查询失败:', err);
+        setError('网络错误，请稍后重试');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const handleKeyPress = (e) => {
+      if (e.key === 'Enter') {
+        handleSearch();
+      }
+    };
+
+    return (
+      <div className="query-section">
+        <h2>智能查询</h2>
+        <div className="query-container">
+          <div className="query-input">
+            <input 
+              type="text" 
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="输入您的问题..." 
+              className="query-field"
+              disabled={loading}
+            />
+            <button 
+              onClick={handleSearch} 
+              disabled={loading || !query.trim()}
+              className="btn btn-primary"
+            >
+              {loading ? '查询中...' : '查询'}
+            </button>
+          </div>
+          
+          <div className="query-options">
+            <div className="option-group">
+              <label>搜索类型:</label>
+              <select 
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value)}
+                className="select-input"
+              >
+                <option value="semantic">语义搜索</option>
+                <option value="keyword">关键词搜索</option>
+                <option value="hybrid">混合搜索</option>
+              </select>
             </div>
+            
+            <div className="option-group">
+              <label>返回结果数:</label>
+              <select 
+                value={topK}
+                onChange={(e) => setTopK(parseInt(e.target.value))}
+                className="select-input"
+              >
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+              </select>
+            </div>
+          </div>
+
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          <div className="query-results">
+            <h3>查询结果 ({results.length})</h3>
+            {results.length === 0 && !loading && !error && (
+              <div className="no-results">
+                请输入查询内容并点击查询按钮
+              </div>
+            )}
+            {results.map((result) => (
+              <div key={result.id} className="result-item">
+                <h4>结果 #{result.id}</h4>
+                <div className="result-content">
+                  <p>{result.content}</p>
+                </div>
+                {result.metadata && Object.keys(result.metadata).length > 0 && (
+                  <div className="result-metadata">
+                    {Object.entries(result.metadata).map(([key, value]) => (
+                      <span key={key} className="meta-item">
+                        <strong>{key}:</strong> {String(value)}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="result-meta">
+                  <span className="similarity">相似度: {(result.similarity * 100).toFixed(1)}%</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderAnalysisReports = () => (
     <div className="analysis-section">
@@ -199,6 +306,7 @@ function HomePage() {
     </div>
   );
 
+
   if (loading || authLoading) {
     return <div className="loading">Loading...</div>;
   }
@@ -254,6 +362,12 @@ function HomePage() {
           >
             用户设置
           </button>
+          <button 
+            className={`nav-item ${activeTab === 'knowledge' ? 'active' : ''}`}
+            onClick={() => setActiveTab('knowledge')}
+          >
+            知识库
+          </button>
         </nav>
         
         <main className="home-content">
@@ -262,6 +376,7 @@ function HomePage() {
           {activeTab === 'query' && renderIntelligentQuery()}
           {activeTab === 'analysis' && renderAnalysisReports()}
           {activeTab === 'settings' && renderUserSettings()}
+          {activeTab === 'knowledge' && <KnowledgeManagement />}
         </main>
       </div>
     </div>
