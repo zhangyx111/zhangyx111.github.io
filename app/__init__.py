@@ -44,8 +44,24 @@ def create_app(config_name=None):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     jwt.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": app.config['CORS_ORIGINS']}})
-    CORS(app, resources={r"/auth/*": {"origins": app.config['CORS_ORIGINS']}})
+    
+    # 配置CORS
+    cors_kwargs = {
+        'resources': {
+            r"/api/*": {
+                'origins': app.config['CORS_ORIGINS'],
+                'methods': app.config['CORS_METHODS'],
+                'allow_headers': app.config['CORS_ALLOW_HEADERS']
+            },
+            r"/auth/*": {
+                'origins': app.config['CORS_ORIGINS'],
+                'methods': app.config['CORS_METHODS'],
+                'allow_headers': app.config['CORS_ALLOW_HEADERS']
+            }
+        },
+        'supports_credentials': True  # 支持跨域认证
+    }
+    CORS(app, **cors_kwargs)
 
     # Create upload folder if it doesn't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -56,6 +72,9 @@ def create_app(config_name=None):
 
     from app.auth.views import auth_bp
     app.register_blueprint(auth_bp, url_prefix = "/auth", static_folder='static', template_folder='templates')
+    
+    from app.api.news_stats import news_stats_bp
+    app.register_blueprint(news_stats_bp)
     
     return app
 

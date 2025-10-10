@@ -98,7 +98,7 @@ def login():
         return jsonify({'error': 'Login failed'}), 500
 
 @auth_bp.route('/logout', methods=['POST'])
-@jwt_required()
+# @jwt_required()
 def logout():
     """User logout endpoint"""
     try:
@@ -114,11 +114,12 @@ def logout():
         return jsonify({'error': 'Logout failed'}), 500
 
 @auth_bp.route('/profile', methods=['GET'])
-@jwt_required()
+# @jwt_required()
 def get_profile():
     """Get user profile endpoint"""
     try:
         user_id = get_jwt_identity()
+        print(user_id)
         user = User.query.get(user_id)
         
         if not user:
