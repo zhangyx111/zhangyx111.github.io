@@ -1,9 +1,23 @@
 from flask import Blueprint, request, jsonify
-from ..services.faiss_test import faiss_db
+from ..services.faiss_vector import faiss_db
+from flask_jwt_extended import jwt_required
+import logging
 
 llm_bp = Blueprint('llm', __name__, url_prefix="/api/llm_service")
 
+# 设置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('log/llm_service.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger('llm_service')
+
 @llm_bp.route('/search', methods=['GET', 'POST'])
+@jwt_required()
 def search():
     try:
         # 获取查询参数

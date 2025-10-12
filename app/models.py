@@ -18,10 +18,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    first_name = db.Column(db.String(50), nullable=True)
-    last_name = db.Column(db.String(50), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
-    is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -39,8 +36,8 @@ class KnowledgeItem(db.Model):
     __tablename__ = 'knowledge_items'
     
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = db.Column(db.String(10), nullable=False)
-    path = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    path = db.Column(db.String(500), nullable=False)
     is_activate = db.Column(db.Boolean, default=True)
 
 # 用户加载器

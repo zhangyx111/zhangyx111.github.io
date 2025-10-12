@@ -53,59 +53,6 @@
   border-color: #667eea;
 }
 
-/* Tag Management */
-.tag-management {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: 10px;
-  margin-bottom: 2rem;
-}
-
-.tag-controls {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-
-.tag-input {
-  flex: 1;
-  padding: 0.75rem;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
-}
-
-.tag-input:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.tag-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.tag-item {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.tag-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-}
 
 /* Knowledge List */
 .knowledge-list {
@@ -150,6 +97,49 @@
   padding-right: 1rem;
 }
 
+.item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.activate-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.activate-tag.active {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.activate-tag.inactive {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  color: white;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+  color: #212529;
+}
+
+.btn-warning:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+}
+
 .item-meta {
   display: flex;
   gap: 0.75rem;
@@ -165,19 +155,6 @@
   color: #6c757d;
 }
 
-.item-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.item-tags .tag-item {
-  background: #e9ecef;
-  color: #495057;
-  font-size: 0.8rem;
-  padding: 0.25rem 0.5rem;
-}
 
 .item-summary {
   color: #6c757d;
@@ -215,19 +192,16 @@
   }
 
   .file-upload-area,
-  .tag-management,
   .knowledge-list {
     padding: 1rem;
   }
 
-  .upload-controls,
-  .tag-controls {
+  .upload-controls {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .file-input,
-  .tag-input {
+  .file-input {
     width: 100%;
   }
 

@@ -39,7 +39,7 @@ def register():
         
         # Create JWT token
         access_token = create_access_token(
-            identity=user.id,
+            identity=user.username,
             additional_claims={'username': user.username, 'email': user.email}
         )
         
@@ -78,27 +78,28 @@ def login():
         
         # Create JWT token
         access_token = create_access_token(
-            identity=user.id,
+            identity=str(user.id),
             additional_claims={'username': user.username, 'email': user.email}
         )
-        
+
         return jsonify({
             'message': 'Login successful',
             'user': {
                 'id': user.id,
                 'username': user.username,
                 'email': user.email,
-                'is_admin': user.is_admin
             },
             'token': access_token
         })
+    
+        
         
     except Exception as e:
         current_app.logger.error(f"Login error: {str(e)}")
         return jsonify({'error': 'Login failed'}), 500
 
 @auth_bp.route('/logout', methods=['POST'])
-# @jwt_required()
+@jwt_required()
 def logout():
     """User logout endpoint"""
     try:

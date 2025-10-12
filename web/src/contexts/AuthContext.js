@@ -61,6 +61,7 @@ export const AuthProvider = ({ children }) => {
       await logoutService();
     } catch (error) {
       console.error('Logout error:', error);
+      // 即使API调用失败，也要清除本地状态
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
