@@ -252,9 +252,5 @@ class LangChainFAISSDynamic:
 
 faiss_db = LangChainFAISSDynamic()
 
-# # 使用示例
-# if __name__ == "__main__":
-#     # 初始化
-#     faiss_manager = LangChainFAISSDynamic("my_knowledge_base")
     
     
