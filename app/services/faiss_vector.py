@@ -1,12 +1,18 @@
 import os
 import re
 import faiss
+from pathlib import Path
+from flask import current_app
 from langchain_community.vectorstores import FAISS
 from typing_extensions import List
 import sentence_transformers
+from langchain_community.llms import Ollama
+from langchain_ollama import ChatOllama
 from langchain_core.embeddings import Embeddings
 from langchain_community.document_loaders import TextLoader, PyPDFLoader, Docx2txtLoader
 from langchain.text_splitter import CharacterTextSplitter, RecursiveCharacterTextSplitter
+from langchain.retrievers import MultiQueryRetriever
+
 
 class SentenceTransformerEmbeddings(Embeddings):
     """自定义的SentenceTransformer嵌入包装器"""
@@ -36,7 +42,12 @@ class LangChainFAISSDynamic:
     def __init__(self, index_path="faiss_index", embedding_model=None):
         self.index_path = index_path
         self.embeddings = SentenceTransformerEmbeddings()
-        
+        self.llm = ChatOllama(
+            model="qwen3:8b", 
+            temperature=0.7,
+            num_predict=2048
+        )
+
         # 尝试加载现有索引，否则创建空索引
         if os.path.exists(index_path):
             self.vector_store = FAISS.load_local(
@@ -52,6 +63,26 @@ class LangChainFAISSDynamic:
             )
             # 立即移除空文档
             self._recreate_without_initial()
+
+        self.check_uploads()
+
+    def check_uploads(self):
+        
+        app_dir = Path(__file__).parent.parent
+        upload_dir = os.path.join(app_dir, "static", "uploads")
+        print("upload dir", upload_dir)
+        
+        if os.path.exists(upload_dir):
+            all_items = os.listdir(upload_dir)
+            files = []
+
+            for item in all_items:
+                item_path = os.path.join(upload_dir, item)
+                if os.path.isfile(item_path):
+                    files.append(item_path)
+
+            for file in files:
+                self.add_file(file)
     
     def _recreate_without_initial(self):
         """重新创建没有初始空文档的索引"""
@@ -127,35 +158,41 @@ class LangChainFAISSDynamic:
 
     def add_file(self, file_path):
         """添加单个文件到索引"""
-        # 根据文件类型选择加载器
-        ext = os.path.splitext(file_path)[1].lower()
-        
-        if ext == '.txt':
-            loader = TextLoader(file_path, encoding='utf-8')
-        elif ext == '.pdf':
-            loader = PyPDFLoader(file_path)
-        elif ext in ['.doc', '.docx']:
-            loader = Docx2txtLoader(file_path)
-        else:
-            raise ValueError(f"不支持的文件格式: {ext}")
-        
-        # 加载文档
-        documents = loader.load()
-        
-        all_splits = []
-        for i, doc in enumerate(documents):
-            print(f"处理第 {i+1} 页, 长度: {len(doc.page_content)} 字符")
+        try:
+            # 根据文件类型选择加载器
+            ext = os.path.splitext(file_path)[1].lower()
             
-            # 预处理文本
-            processed_content = self._preprocess_text(doc.page_content, os.path.basename(file_path))
+            if ext == '.txt':
+                loader = TextLoader(file_path, encoding='utf-8')
+            elif ext == '.pdf':
+                loader = PyPDFLoader(file_path)
+            elif ext in ['.doc', '.docx']:
+                loader = Docx2txtLoader(file_path)
+            else:
+                raise ValueError(f"不支持的文件格式: {ext}")
             
-            # 获取合适的分割器
-            text_splitter = RecursiveCharacterTextSplitter()
+            # 加载文档
+            documents = loader.load()
             
+            if not documents:
+                raise ValueError(f"文件 {file_path} 没有加载到任何内容")
+            
+            all_splits = []
+            for i, doc in enumerate(documents):
+                print(f"处理第 {i+1} 页, 长度: {len(doc.page_content)} 字符")
+                
+                # 预处理文本
+                processed_content = self._preprocess_text(doc.page_content, os.path.basename(file_path))
+                
+                # 获取合适的分割器
+                text_splitter = self._get_optimized_splitter(ext)
+                
             # 分割文本
-            all_splits = text_splitter.split_text(processed_content)
-        
-        
+            splits = text_splitter.split_text(processed_content)
+            # 过滤掉空字符串
+            splits = [split for split in splits if split.strip()]
+            all_splits.extend(splits)
+            
             # 创建临时索引并合并
             if all_splits:
                 temp_store = FAISS.from_texts(all_splits, self.embeddings)
@@ -165,8 +202,11 @@ class LangChainFAISSDynamic:
                 print(f"当前索引总块数: {self.vector_store.index.ntotal}")
                 return True
             else:
-                print(f"❌ 文件 {file_path} 没有生成任何有效的文本块")
-                return False
+                raise ValueError(f"文件 {file_path} 没有生成任何有效的文本块")
+                
+        except Exception as e:
+            print(f"❌ 处理文件 {file_path} 时出错: {str(e)}")
+            raise e
     
     def add_directory(self, directory_path):
         """批量添加目录中的所有文件"""
@@ -193,7 +233,18 @@ class LangChainFAISSDynamic:
     
     def search(self, query, k=5):
         """搜索"""
-        return self.vector_store.similarity_search(query, k=k)
+        try:
+            print(f"开始搜索: query='{query}', k={k}")
+            self.retreiver = MultiQueryRetriever.from_llm(
+                retriever=self.vector_store.as_retriever(),
+                llm = self.llm,
+            )
+            results = self.vector_store.similarity_search(query, k=k)
+            print(f"搜索成功，返回 {len(results)} 个结果")
+            return results
+        except Exception as e:
+            print(f"搜索失败: {str(e)}")
+            raise e
     
     def get_doc_count(self):
         """获取文档数量"""
@@ -201,26 +252,5 @@ class LangChainFAISSDynamic:
 
 faiss_db = LangChainFAISSDynamic()
 
-# # 使用示例
-# if __name__ == "__main__":
-#     # 初始化
-#     faiss_manager = LangChainFAISSDynamic("my_knowledge_base")
     
-#     # 添加单个文件
-#     # faiss_manager.add_file("document1.pdf")
     
-#     # 添加多个文件
-#     # faiss_manager.add_directory("knowledge_docs")
-
-#     faiss_manager.add_file("news\huozhe.txt")
-    
-#     # 搜索
-#     results = faiss_manager.search("人工智能")
-#     for i, doc in enumerate(results):
-#         print(f"结果 {i+1}: {doc.page_content[:100]}...")
-    
-#     # 保存索引
-#     faiss_manager.save()
-    
-#     print(f"总文档块数量: {faiss_manager.get_doc_count()}")
-

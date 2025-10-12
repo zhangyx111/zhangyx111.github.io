@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from sqlalchemy import text
 from config import config
 
 # 配置日志
@@ -73,8 +74,11 @@ def create_app(config_name=None):
     from app.auth.views import auth_bp
     app.register_blueprint(auth_bp, url_prefix = "/auth", static_folder='static', template_folder='templates')
     
-    from app.api.news_stats import news_stats_bp
-    app.register_blueprint(news_stats_bp)
+    from app.api.llm_service import llm_bp
+    app.register_blueprint(llm_bp)
+
+    from app.api.knowledge import knowledge_bp
+    app.register_blueprint(knowledge_bp)
     
     return app
 
